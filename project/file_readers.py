@@ -277,15 +277,15 @@ def extract_text_and_tables_from_pptx_segments(pptx_path):
 
 # ------> Word Document with Segments <------ #
 # ------> PDF Conversion <-------#
-def word_to_pdf(file_path):
-    document = Document()
-    document.LoadFromFile(file_path)
+# def word_to_pdf(file_path):
+#     document = Document()
+#     document.LoadFromFile(file_path)
     
-    pdf_path = "pdf_files/Translated_ToPDF.pdf"
-    document.SaveToFile(pdf_path, FileFormat.PDF)
-    document.Close()
+#     pdf_path = "pdf_files/Translated_ToPDF.pdf"
+#     document.SaveToFile(pdf_path, FileFormat.PDF)
+#     document.Close()
     
-    return pdf_path
+#     return pdf_path
 
 
 # ------> Word Document <-------#
