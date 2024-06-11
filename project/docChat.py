@@ -3,9 +3,8 @@ from openai import OpenAI
 import os
 import openai
 
-#load_dotenv()
-#key = os.getenv("prooflingo_client_api")
-key = "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"
+load_dotenv()
+key = os.getenv("prooflingo_client_api")
 def docChat(file_path, user_question, key=key):
     client = OpenAI(api_key=key)
     assistant = client.beta.assistants.create(
