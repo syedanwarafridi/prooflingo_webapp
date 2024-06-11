@@ -28,7 +28,7 @@ SECRET_KEY = 'django-insecure-nd_o39=4@&di0vhm9b8!am!-xpj1&ish0g+s_6+#zojv^wd7e^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['prooflingo.azurewebsites.net']
 
 
 # Application definition
@@ -62,11 +62,12 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
 ]
 
-# CORS_ALLOWED_ORIGINS = [
-#     "http://localhost:8080",
-#     "http://127.0.0.1:9000",
-#     "http://127.0.0.1:5173"
-# ]
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:8080",
+    "http://127.0.0.1:9000",
+    "http://127.0.0.1:5173",
+    "http://35.213.154.243",
+]
 
 # Allowing all origins to make CORS requests
 CORS_ALLOW_ALL_ORIGINS = True
