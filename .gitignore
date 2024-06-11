@@ -1,0 +1,8 @@
+
+*.pyc
+*/*.pyc
+.idea/
+/env
+/media
+.kaka.sdlxlif
+.env
