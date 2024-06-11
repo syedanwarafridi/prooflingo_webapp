@@ -6,7 +6,8 @@ import pandas as pd
 from dotenv import load_dotenv
 load_dotenv()
 
-key= os.getenv('prooflingo_client_api')
+# key= os.getenv('prooflingo_client_api')
+key = "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"
 client = OpenAI(api_key=key)
 
 
