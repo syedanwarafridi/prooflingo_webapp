@@ -7,6 +7,8 @@ from .Assistants import comparison_assistant
 from pptx.util import Inches
 import re
 import docx2pdf
+import os
+from docx import Document
 
 # ------> PPTX Document <------#
 def extract_text_and_tables_from_pptx(pptx_path):
@@ -362,7 +364,6 @@ def extract_text_and_tables_word_segments(pdf_path):
 
 #------------> Auto Save <----------#
 def process_docx(updated_file_path, comparison_data):
-    from docx import Document
 
     if os.path.exists(updated_file_path):
         document = Document(updated_file_path)
