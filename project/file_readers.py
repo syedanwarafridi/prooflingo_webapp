@@ -1,11 +1,12 @@
 from pptx import Presentation
 import pdfplumber
 import pandas as pd
-from spire.doc import *
-from spire.doc.common import *
+# from spire.doc import *
+# from spire.doc.common import *
 from .Assistants import comparison_assistant
 from pptx.util import Inches
 import re
+import docx2pdf
 
 # ------> PPTX Document <------#
 def extract_text_and_tables_from_pptx(pptx_path):
@@ -36,15 +37,22 @@ def extract_text_and_tables_from_pptx(pptx_path):
     return response_data
 
 #------> PDf Conversion <-------#
+# def word_to_pdf(file_path):
+#     document = Document()
+#     document.LoadFromFile(file_path)
+    
+#     pdf_path = "pdf_files/Translated_ToPDF.pdf"
+#     document.SaveToFile(pdf_path, FileFormat.PDF)
+#     document.Close()
+    
+#     return pdf_path
+
 def word_to_pdf(file_path):
-    document = Document()
-    document.LoadFromFile(file_path)
-    
-    pdf_path = "pdf_files/Translated_ToPDF.pdf"
-    document.SaveToFile(pdf_path, FileFormat.PDF)
-    document.Close()
-    
-    return pdf_path
+    output_dir = "pdf_files/"
+    output_filename = "Translated_ToPDF.pdf"
+    output_path = output_dir + output_filename
+    docx2pdf.convert(file_path, output_path)
+    return output_path
 
 # Define unwanted substrings
 unwanted_substrings = [
