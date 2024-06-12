@@ -45,7 +45,7 @@ def word_to_pdf(file_path):
     parameter.IsEmbeddedAllFonts = True
 
     pdf_path = "pdf_files/Translated_ToPDF.pdf"
-    document.SaveToFile(pdf_path, FileFormat.PDF, parameter)
+    document.SaveToFile(pdf_path, parameter)
     document.Close()
     
     return pdf_path
