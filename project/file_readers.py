@@ -10,7 +10,7 @@ import docx2pdf
 import os
 from docx import Document
 
-# ------> PPTX Document <------#
+# ------> PPTX Document <------# Testing
 def extract_text_and_tables_from_pptx(pptx_path):
     presentation = Presentation(pptx_path)
     response_data = []
