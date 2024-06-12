@@ -41,9 +41,11 @@ def extract_text_and_tables_from_pptx(pptx_path):
 def word_to_pdf(file_path):
     document = Document()
     document.LoadFromFile(file_path)
-    
+    parameter = ToPdfParameterList()
+    parameter.IsEmbeddedAllFonts = True
+
     pdf_path = "pdf_files/Translated_ToPDF.pdf"
-    document.SaveToFile(pdf_path, FileFormat.PDF)
+    document.SaveToFile(pdf_path, FileFormat.PDF, parameter)
     document.Close()
     
     return pdf_path
