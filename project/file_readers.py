@@ -1,13 +1,14 @@
 from pptx import Presentation
 import pdfplumber
 import pandas as pd
-from spire.doc import *
-from spire.doc.common import *
+# from spire.doc import *
+# from spire.doc.common import *
 from .Assistants import comparison_assistant
 from pptx.util import Inches
 import re
 import docx2pdf
 import os
+from docx import Document
 
 # ------> PPTX Document <------#
 def extract_text_and_tables_from_pptx(pptx_path):
@@ -38,17 +39,32 @@ def extract_text_and_tables_from_pptx(pptx_path):
     return response_data
 
 #------> PDf Conversion <-------#
-def word_to_pdf(file_path):
-    document = Document()
-    document.LoadFromFile(file_path)
-    parameter = ToPdfParameterList()
-    parameter.IsEmbeddedAllFonts = True
+# def word_to_pdf(file_path):
+#     document = Document()
+#     document.LoadFromFile(file_path)
+#     parameter = ToPdfParameterList()
+#     parameter.IsEmbeddedAllFonts = True
 
-    pdf_path = "pdf_files/Translated_ToPDF.pdf"
-    document.SaveToFile(pdf_path, parameter)
-    document.Close()
+#     pdf_path = "pdf_files/Translated_ToPDF.pdf"
+#     document.SaveToFile(pdf_path, parameter)
+#     document.Close()
     
-    return pdf_path
+#     return pdf_path
+from docx2pdf import convert
+
+def word_to_pdf(input_file):
+    output_file = "pdf_files/kk.pdf"
+    if output_file is None:
+        # Get the directory and filename without extension
+        directory, filename = os.path.split(input_file)
+        filename_without_ext = os.path.splitext(filename)[0]
+        # Set the output file path
+        output_file = os.path.join(directory, f"{filename_without_ext}.pdf")
+    
+    # Convert the DOCX file to PDF
+    convert(input_file, output_file)
+    
+    return output_file
 
 # Define unwanted substrings
 unwanted_substrings = [
@@ -358,7 +374,7 @@ def extract_text_and_tables_word_segments(pdf_path):
 
 #------------> Auto Save <----------#
 def process_docx(updated_file_path, comparison_data):
-    from docx import Document
+    # from docx import Document
 
     if os.path.exists(updated_file_path):
         document = Document(updated_file_path)
