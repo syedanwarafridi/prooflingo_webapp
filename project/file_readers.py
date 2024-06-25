@@ -1,16 +1,15 @@
 from pptx import Presentation
 import pdfplumber
 import pandas as pd
-# from spire.doc import *
-# from spire.doc.common import *
+from spire.doc import *
+from spire.doc.common import *
 from .Assistants import comparison_assistant
+from docx import Document
+from pptx import Presentation
 from pptx.util import Inches
 import re
-import docx2pdf
-import os
-from docx import Document
 
-# ------> PPTX Document <------# Testing
+# ------> PPTX Document <------#
 def extract_text_and_tables_from_pptx(pptx_path):
     presentation = Presentation(pptx_path)
     response_data = []
@@ -39,32 +38,15 @@ def extract_text_and_tables_from_pptx(pptx_path):
     return response_data
 
 #------> PDf Conversion <-------#
-# def word_to_pdf(file_path):
-#     document = Document()
-#     document.LoadFromFile(file_path)
-#     parameter = ToPdfParameterList()
-#     parameter.IsEmbeddedAllFonts = True
-
-#     pdf_path = "pdf_files/Translated_ToPDF.pdf"
-#     document.SaveToFile(pdf_path, parameter)
-#     document.Close()
+def word_to_pdf(file_path):
+    document = Document()
+    document.LoadFromFile(file_path)
     
-#     return pdf_path
-from docx2pdf import convert
-
-def word_to_pdf(input_file):
-    output_file = "pdf_files/kk.pdf"
-    if output_file is None:
-        # Get the directory and filename without extension
-        directory, filename = os.path.split(input_file)
-        filename_without_ext = os.path.splitext(filename)[0]
-        # Set the output file path
-        output_file = os.path.join(directory, f"{filename_without_ext}.pdf")
+    pdf_path = "pdf_files/Translated_ToPDF.pdf"
+    document.SaveToFile(pdf_path, FileFormat.PDF)
+    document.Close()
     
-    # Convert the DOCX file to PDF
-    convert(input_file, output_file)
-    
-    return output_file
+    return pdf_path
 
 # Define unwanted substrings
 unwanted_substrings = [
@@ -289,15 +271,15 @@ def extract_text_and_tables_from_pptx_segments(pptx_path):
 
 # ------> Word Document with Segments <------ #
 # ------> PDF Conversion <-------#
-# def word_to_pdf(file_path):
-#     document = Document()
-#     document.LoadFromFile(file_path)
+def word_to_pdf(file_path):
+    document = Document()
+    document.LoadFromFile(file_path)
     
-#     pdf_path = "pdf_files/Translated_ToPDF.pdf"
-#     document.SaveToFile(pdf_path, FileFormat.PDF)
-#     document.Close()
+    pdf_path = "pdf_files/Translated_ToPDF.pdf"
+    document.SaveToFile(pdf_path, FileFormat.PDF)
+    document.Close()
     
-#     return pdf_path
+    return pdf_path
 
 
 # ------> Word Document <-------#
@@ -374,8 +356,6 @@ def extract_text_and_tables_word_segments(pdf_path):
 
 #------------> Auto Save <----------#
 def process_docx(updated_file_path, comparison_data):
-    # from docx import Document
-
     if os.path.exists(updated_file_path):
         document = Document(updated_file_path)
     else:
@@ -422,3 +402,217 @@ def process_pptx(updated_file_path, comparison_data):
                 table_shape.cell(i, j).text = table_data[key][i-1]
 
     presentation.save(updated_file_path)
+    
+#---------> Bilingual File Reader <-------------#
+import xml.etree.ElementTree as ET
+import re
+
+def parse_bilingual(file_path):
+    tree = ET.parse(file_path)
+    root = tree.getroot()
+    
+    namespaces = {'xliff': 'urn:oasis:names:tc:xliff:document:1.2'}
+    source_texts = []
+    target_texts = []
+
+    def strip_special_tags(text):
+        # Strip <fontFormat> tags and their content
+        text = re.sub(r'<fontFormat.?>(.?)<\/fontFormat>', r'\1', text, flags=re.DOTALL)
+        # Strip <fieldStart> and <fieldEnd> tags
+        text = re.sub(r'<fieldStart.*?>', '', text)
+        text = re.sub(r'<fieldEnd.*?>', '', text)
+        return text.strip()  # Strip leading and trailing whitespace
+
+    for trans_unit in root.findall(".//xliff:trans-unit", namespaces):
+        source = trans_unit.find("xliff:source", namespaces)
+        target = trans_unit.find("xliff:target", namespaces)
+        
+        source_text = ''.join(source.itertext()).strip() if source is not None else ''
+        target_text = ''.join(target.itertext()).strip() if target is not None else ''
+
+        source_texts.append(strip_special_tags(source_text))
+        target_texts.append(strip_special_tags(target_text))
+
+    # Join all source texts and target texts with newline characters
+    all_source_text = '\n'.join(source_texts)
+    all_target_text = '\n'.join(target_texts)
+
+    return all_source_text, all_target_text
+
+# # Example file path, replace with your actual file path
+# file_path = 'cleint.txlf'  # Replace with your actual file path
+
+# source_text, target_text = parse_bilingual(file_path)
+
+# print("Source Texts:")
+# print(source_text)
+
+# print("\nTarget Texts:")
+# print(target_text)
+########################## -------> Content Extraction Using New Flow of XML <-------- ############################
+import os
+from docx_utils.flatten import opc_to_flat_opc
+
+def docx_to_xml(file_path):
+    dir_path = os.path.join("xml_files")
+    if not os.path.exists(dir_path):
+        os.makedirs(dir_path)
+
+    # Extract the filename without the extension
+    name = os.path.splitext(os.path.basename(file_path))[0]
+
+    out_file_path = os.path.join(dir_path, f"{name}.xml")
+    opc_to_flat_opc(file_path, out_file_path)
+
+    return out_file_path
+
+# docx_to_xml("new-source.docx")
+
+import xml.etree.ElementTree as ET
+import pandas as pd
+
+def extract_text_and_tables_from_xml(file_path):
+    xml_file_path = docx_to_xml(file_path)
+    # Load and parse the XML file
+    tree = ET.parse(xml_file_path)
+    root = tree.getroot()
+
+    # Namespace dictionary to handle XML namespaces in the document
+    namespaces = {
+        'w': 'http://schemas.openxmlformats.org/wordprocessingml/2006/main'
+    }
+
+    # Find all body elements
+    body_elements = root.findall('.//w:body', namespaces)
+
+    pages = []
+    current_page_content = []
+
+    def extract_run_text(run):
+        # Extract text from a run
+        text_elements = run.findall('.//w:t', namespaces)
+        run_text = ''.join([text_elem.text for text_elem in text_elements if text_elem.text])
+        return run_text
+
+    def extract_paragraph_text(paragraph):
+        # Extract text from a paragraph, separating lines with \n
+        runs = paragraph.findall('.//w:r', namespaces)
+        lines = [extract_run_text(run) for run in runs]
+        return '\n'.join(lines)
+
+    def extract_table_data(table):
+        # Extract table data into a list of lists, separating cell lines with \n
+        table_data = []
+        for row in table.findall('.//w:tr', namespaces):
+            row_data = []
+            for cell in row.findall('.//w:tc', namespaces):
+                cell_text = '\n'.join(cell.itertext()).strip()
+                cell_metadata = extract_metadata(cell)
+                row_data.append({
+                    'text': cell_text,
+                    'metadata': cell_metadata
+                })
+            table_data.append(row_data)
+        return table_data
+
+    def extract_metadata(elem):
+        # Extract metadata such as style, alignment, font, and font size
+        metadata = {}
+        pPr = elem.find('.//w:pPr', namespaces)
+        if pPr is not None:
+            style = pPr.find('.//w:pStyle', namespaces)
+            if style is not None:
+                metadata['style'] = style.attrib.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val', '')
+            alignment = pPr.find('.//w:jc', namespaces)
+            if alignment is not None:
+                metadata['alignment'] = alignment.attrib.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val', '')
+
+        rPr = elem.find('.//w:rPr', namespaces)
+        if rPr is not None:
+            font = rPr.find('.//w:rFonts', namespaces)
+            if font is not None:
+                metadata['font'] = font.attrib.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}ascii', '')
+            font_size = rPr.find('.//w:sz', namespaces)
+            if font_size is not None:
+                fontsize = int(font_size.attrib.get('{http://schemas.openxmlformats.org/wordprocessingml/2006/main}val', '')) // 2
+                metadata['font_size'] = str(fontsize)
+            if rPr.find('.//w:b', namespaces) is not None:
+                metadata['bold'] = True
+            if rPr.find('.//w:i', namespaces) is not None:
+                metadata['italic'] = True
+            if rPr.find('.//w:u', namespaces) is not None:
+                metadata['underline'] = True
+        return metadata
+
+    def extract_paragraph_metadata(paragraph):
+        # Extract metadata for each run within a paragraph
+        runs = paragraph.findall('.//w:r', namespaces)
+        metadata_list = []
+        for run in runs:
+            run_text = extract_run_text(run)
+            run_metadata = extract_metadata(run)
+            metadata_list.append({
+                'text': run_text,
+                'metadata': run_metadata
+            })
+        return metadata_list
+
+    for body in body_elements:
+        for elem in body:
+            if elem.tag == '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}p':
+                if elem.find('.//w:r//w:lastRenderedPageBreak', namespaces) is not None:
+                    # Add the current content to pages and start a new page
+                    pages.append(current_page_content)
+                    current_page_content = []
+
+                para_text = extract_paragraph_text(elem)
+                para_metadata = extract_paragraph_metadata(elem)
+                paragraph_style = extract_metadata(elem).get('style', '')
+                current_page_content.append({
+                    'type': 'paragraph',
+                    'text': para_text,
+                    'metadata': para_metadata,
+                    'style': paragraph_style
+                })
+
+            elif elem.tag == '{http://schemas.openxmlformats.org/wordprocessingml/2006/main}tbl':  # Table element
+                table_data = extract_table_data(elem)
+                table_metadata = extract_metadata(elem)
+                current_page_content.append({
+                    'type': 'table',
+                    'data': table_data,
+                    'metadata': table_metadata
+                })
+
+                # Add the current content to pages and reset for next content
+                pages.append(current_page_content)
+                current_page_content = []
+
+    # Add any remaining content as the last page
+    if current_page_content:
+        pages.append(current_page_content)
+    return pages
+
+#------> Converting into Lists <-------#
+def extract_paragraphs_and_tables_into_lists(pages):
+    all_paragraphs_and_tables_per_page = []
+
+    for page in pages:
+        page_content = []
+
+        for element in page:
+            if element['type'] == 'paragraph':
+                page_content.append(element['text'].strip())
+
+            elif element['type'] == 'table':
+                table_content = []
+
+                for row in element['data']:
+                    row_text = [cell['text'].strip() for cell in row if cell['text'].strip() != '']
+                    table_content.append(row_text)
+
+                page_content.append(table_content)  # Append list of table rows
+
+        all_paragraphs_and_tables_per_page.append(page_content)
+
+    return all_paragraphs_and_tables_per_page

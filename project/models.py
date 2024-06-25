@@ -21,6 +21,7 @@ class Project(models.Model):
     target_language = models.CharField(max_length=50)
     translation_memory = models.BooleanField(default=False)
     segments = models.BooleanField(default=False)
+    bilingual = models.BooleanField(default=False)
     
     def __str__(self):
         return self.project_name

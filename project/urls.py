@@ -4,14 +4,16 @@ from .views import (CreateProjectAPIView, ListProjectsAPIView,
                     UpdateProjectStatusAPIView, DuplicateProjectAPIView,
                     ProjectDocChatAPIView,  ProjectContentAPIView, ProjectPageAPIView, SmartRefAPIView,
                     AssistantAPIView, CreateBilingualProjectAPIView, ProjectSegmentsAPIView, AutoSaveAPIView,
-                    TextTunningAPI, UpdateProjectAPIView)
+                    TextTunningAPI, UpdateProjectAPIView, CreateBilingualProject, FormatBilingoText)
 
 urlpatterns = [
 
     # #to create the project------> screen 13
     path('create-project/', CreateProjectAPIView.as_view(), name='create_project_api'),
+    path('create-bilingo-project/', CreateBilingualProject.as_view(), name='create-bilingo-project-api'),
     path('projects/<int:project_id>/docchat/', ProjectDocChatAPIView.as_view(), name='document-chatbot'),
     path('projects/<int:project_id>/content/', ProjectContentAPIView.as_view(), name='project-content'),
+    path('projects/<int:project_id>/bilingo/content/', FormatBilingoText.as_view(), name='bilingual-content-formatter'),
     path('projects/<int:project_id>/page/', ProjectPageAPIView.as_view(), name='project_page'),
     path('smart-ref/', SmartRefAPIView.as_view(), name='smart-ref'),
     path('projects/<int:project_id>/segments/', ProjectSegmentsAPIView.as_view(), name='project-segments'),

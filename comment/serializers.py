@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 from project.models import Project
-from projectTeams.models import ProjectTeam
+from projectTeams.models import *
 from .models import Comments, Replies
 
 
@@ -23,15 +23,17 @@ class ReplySerializer(serializers.ModelSerializer):
 class AddCommentSerializer(serializers.ModelSerializer):
     project_id = serializers.IntegerField(write_only=True)
     user_id = serializers.IntegerField(write_only=True)
+    team_id = serializers.IntegerField(write_only=True)
     comment = serializers.CharField()
 
     class Meta:
         model = Comments
-        fields = ["user_id", "project_id", "comment"]
+        fields = ["user_id", "project_id", "team_id", "comment"]
 
     def validate(self, data):
         user_id = data.get("user_id")
         project_id = data.get("project_id")
+        team_id = data.get("team_id")
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
@@ -40,7 +42,15 @@ class AddCommentSerializer(serializers.ModelSerializer):
             project = Project.objects.get(id=project_id)
         except Project.DoesNotExist:
             raise serializers.ValidationError("Project with this ID does not exist.")
-        if not ProjectTeam.objects.filter(user=user, project=project).exists():
+        try:
+            team_member = TeamMember.objects.get(team__id=team_id, user__id=user_id)
+        except TeamMember.DoesNotExist:
+            raise serializers.ValidationError(
+                "User is not a member of this project team."
+            )
+        if not ProjectTeam.objects.filter(
+            team_member=team_member, project=project
+        ).exists():
             raise serializers.ValidationError(
                 "User is not a member of this project team."
             )
@@ -110,16 +120,18 @@ class AddCommentReplySerializer(serializers.ModelSerializer):
     comment_id = serializers.IntegerField(write_only=True)
     project_id = serializers.IntegerField(write_only=True)
     user_id = serializers.IntegerField(write_only=True)
+    team_id = serializers.IntegerField(write_only=True)
     reply = serializers.CharField()
 
     class Meta:
         model = Comments
-        fields = ["user_id", "project_id", "comment_id", "reply"]
+        fields = ["user_id", "project_id","team_id", "comment_id", "reply"]
 
     def validate(self, data):
         user_id = data.get("user_id")
         comment_id = data.get("comment_id")
         project_id = data.get("project_id")
+        team_id = data.get("team_id")
         try:
             user = User.objects.get(id=user_id)
         except User.DoesNotExist:
@@ -132,7 +144,15 @@ class AddCommentReplySerializer(serializers.ModelSerializer):
             Comments.objects.get(id=comment_id)
         except Comments.DoesNotExist:
             raise serializers.ValidationError("Comment with this ID does not exist.")
-        if not ProjectTeam.objects.filter(user=user, project=project).exists():
+        try:
+            team_member = TeamMember.objects.get(team__id=team_id, user__id=user_id)
+        except TeamMember.DoesNotExist:
+            raise serializers.ValidationError(
+                "User is not a member of this project team."
+            )
+        if not ProjectTeam.objects.filter(
+            team_member=team_member, project=project
+        ).exists():
             raise serializers.ValidationError(
                 "User is not a member of this project team."
             )

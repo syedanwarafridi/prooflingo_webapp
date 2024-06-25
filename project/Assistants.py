@@ -9,7 +9,7 @@ load_dotenv()
 key= os.getenv('prooflingo_client_api')
 client = OpenAI(api_key=key)
 
-# Testing
+
 #---------------------------------------Main Comparison assistant Function--------------------------------------------------------------------------------------
 def comparison_assistant(original_text,translated_text, history, contextual_matter, language):
     prompt = f""" Given a page from texts:

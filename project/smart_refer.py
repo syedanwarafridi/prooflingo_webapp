@@ -5,7 +5,6 @@ from openai import OpenAI
 from dotenv import load_dotenv
 load_dotenv()
 key= os.getenv('prooflingo_client_api')
-
 client = OpenAI(api_key=key)
 
 def read_pdf(file_path):

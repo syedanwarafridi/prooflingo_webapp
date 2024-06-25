@@ -18,7 +18,7 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate_first_name(self, value):
         if len(value) < 2:
             raise serializers.ValidationError(
-                "Name must be at least 2 characters long."
+                "Name must be at least 4 characters long."
             )
         if not all(char.isalpha() or char.isspace() for char in value):
             raise serializers.ValidationError(
@@ -72,11 +72,11 @@ class LoginSerializer(serializers.Serializer):
             try:
                 user = User.objects.get(email=email)
             except User.DoesNotExist:
-                raise serializers.ValidationError("Incorrect credentials, try again")
+                raise serializers.ValidationError("No registered user found against your email address")
             user = authenticate(username=user.username, password=password)
             if user and user.is_active:
                 return user
-            raise serializers.ValidationError("Incorrect credentials, try again")
+            raise serializers.ValidationError("Incorrect password, please try again")
         else:
             raise serializers.ValidationError("Must include both email and password")
 
@@ -150,3 +150,18 @@ class ProfileUpdateSerializer(serializers.Serializer):
         instance.save()
         return instance
  
+
+# Forget Password Serializer
+class PasswordResetSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def validate_email(self, value):
+        if not User.objects.filter(email=value).exists():
+            raise serializers.ValidationError("This email is not registered.")
+        return value
+
+# Password Reset Confirm Serializer
+class PasswordResetConfirmSerializer(serializers.Serializer):
+    new_password = serializers.CharField(write_only=True)
+    token = serializers.CharField(write_only=True)
+    uidb64 = serializers.CharField(write_only=True)

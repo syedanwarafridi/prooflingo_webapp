@@ -6,7 +6,7 @@ from .serializers import (
     CommentSerializer,
     AddCommentReplySerializer,
     ReplySerializer,
-    RepliesSerializer
+    RepliesSerializer,
 )
 from rest_framework import generics
 from rest_framework.views import APIView
@@ -24,30 +24,23 @@ class AddProjectCommentAPIView(APIView):
     def post(self, request, format=None):
         serializer = AddCommentSerializer(data=request.data)
         if serializer.is_valid():
-            try:
-                comment = serializer.save()
-                response = {
-                    "message": "Comment added to the project successfully",
-                    "data": ProjectCommentsSerializer(comment).data,
-                }
-                return Response(
-                    response,
-                    status=status.HTTP_201_CREATED,
-                )
-            except User.DoesNotExist:
-                return Response(
-                    {"error": "User with the provided ID does not exist."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
-            except Project.DoesNotExist:
-                return Response(
-                    {"error": "Project with the provided ID does not exist."},
-                    status=status.HTTP_400_BAD_REQUEST,
-                )
+            comment = serializer.save()
+            response = {
+                "message": "Comment added to the project successfully",
+                "data": ProjectCommentsSerializer(comment).data,
+            }
+            return Response(
+                response,
+                status=status.HTTP_201_CREATED,
+            )
+        errors = serializer.errors
+        response = {}
+        if 'non_field_errors' in errors:
+            response['error'] = errors['non_field_errors'][0]
         else:
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-
+            response['error'] = "Invalid data provided."
+        return Response(response, status=status.HTTP_400_BAD_REQUEST)
+    
 # Get Project Comments
 class GetProjectCommentsAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -58,7 +51,7 @@ class GetProjectCommentsAPIView(APIView):
             project_comments = Comments.objects.filter(project=project)
 
             if not project_comments.exists():
-                return Response([],status=status.HTTP_200_OK)
+                return Response([], status=status.HTTP_200_OK)
             serializer = ProjectCommentsSerializer(project_comments, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Project.DoesNotExist:
@@ -88,7 +81,7 @@ class AddCommentReplyAPIView(APIView):
             try:
                 serializer.save()
                 return Response(
-                    {"Comment added to the project successfully"},
+                    {"message": "Comment added to the project successfully"},
                     status=status.HTTP_201_CREATED,
                 )
             except User.DoesNotExist:

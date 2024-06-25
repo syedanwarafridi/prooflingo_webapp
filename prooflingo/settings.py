@@ -13,6 +13,12 @@ https://docs.djangoproject.com/en/4.1/ref/settings/
 from pathlib import Path
 import datetime
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+GMAIL_EMAIL= os.getenv('GMAIL_EMAIL')
+GMAIL_APP_PASSWORD = os.getenv('GMAIL_APP_PASSWORD')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -28,7 +34,7 @@ SECRET_KEY = 'django-insecure-nd_o39=4@&di0vhm9b8!am!-xpj1&ish0g+s_6+#zojv^wd7e^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['prooflingo.azurewebsites.net']
+ALLOWED_HOSTS = []
 
 
 # Application definition
@@ -62,12 +68,11 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
 ]
 
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:8080",
-    "http://127.0.0.1:9000",
-    "http://127.0.0.1:5173",
-    "http://35.213.154.243",
-]
+# CORS_ALLOWED_ORIGINS = [
+#     "http://localhost:8080",
+#     "http://127.0.0.1:9000",
+#     "http://127.0.0.1:5173"
+# ]
 
 # Allowing all origins to make CORS requests
 CORS_ALLOW_ALL_ORIGINS = True
@@ -77,7 +82,7 @@ ROOT_URLCONF = 'prooflingo.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [BASE_DIR / "templates"],  # Make sure this points to the correct directory
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -160,3 +165,14 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
 }
+
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = GMAIL_EMAIL
+EMAIL_HOST_PASSWORD = GMAIL_APP_PASSWORD 
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_USE_SSL = False  # Set it to True if you are using SSL
+
+FRONTEND_URL = 'http://hysabat.pk'
